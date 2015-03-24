@@ -15,17 +15,16 @@
  */
 package com.thimbleware.jmemcached;
 
-import com.thimbleware.jmemcached.storage.bytebuffer.BlockStorageCacheStorage;
 import com.thimbleware.jmemcached.storage.CacheStorage;
+import com.thimbleware.jmemcached.storage.bytebuffer.BlockStorageCacheStorage;
 import com.thimbleware.jmemcached.storage.bytebuffer.BlockStoreFactory;
 import com.thimbleware.jmemcached.storage.bytebuffer.ByteBufferBlockStore;
+import com.thimbleware.jmemcached.storage.generic.GenericCacheEvictionHashMap;
+import com.thimbleware.jmemcached.storage.mmap.MemoryMappedBlockStore;
+import com.thimbleware.jmemcached.util.Bytes;
 import org.apache.commons.cli.*;
 
 import java.net.InetSocketAddress;
-
-import com.thimbleware.jmemcached.util.Bytes;
-import com.thimbleware.jmemcached.storage.hash.ConcurrentLinkedHashMap;
-import com.thimbleware.jmemcached.storage.mmap.MemoryMappedBlockStore;
 
 
 /**
@@ -187,7 +186,8 @@ public class Main {
             storage = new BlockStorageCacheStorage(8, (int)ceiling, blockSize, maxBytes, max_size, blockStoreFactory);
         }
         else  {
-            storage = ConcurrentLinkedHashMap.create(ConcurrentLinkedHashMap.EvictionPolicy.FIFO, max_size, maxBytes);
+//            storage = ConcurrentLinkedHashMap.create(ConcurrentLinkedHashMap.EvictionPolicy.FIFO, max_size, maxBytes);
+            storage = new GenericCacheEvictionHashMap<>(3);
         }
 
 
