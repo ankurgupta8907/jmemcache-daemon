@@ -187,7 +187,8 @@ public class Main {
         }
         else  {
 //            storage = ConcurrentLinkedHashMap.create(ConcurrentLinkedHashMap.EvictionPolicy.FIFO, max_size, maxBytes);
-            storage = new GenericCacheEvictionHashMap<>(3);
+            System.out.println("Running my file.");
+            storage = new GenericCacheEvictionHashMap<Key, LocalCacheElement>(1000);
         }
 
 

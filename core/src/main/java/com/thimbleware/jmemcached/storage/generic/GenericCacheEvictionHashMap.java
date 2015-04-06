@@ -25,13 +25,14 @@ public final class GenericCacheEvictionHashMap<K, V extends SizedItem> implement
 
     public GenericCacheEvictionHashMap(int maximumCapacity) {
         data = new ConcurrentHashMap<K, V>(maximumCapacity, 0.75f, 16);
-        this.evictionPolicy = new LRUCacheEvictionPolicy<K, V>(maximumCapacity);
+        this.evictionPolicy = new ARCCacheEvictionPolicy<K, V>(maximumCapacity);
         this.capacity = maximumCapacity;
         this.lock = new ReentrantLock();
     }
     
     @Override
     public V get(Object keyObject) {
+        System.out.println(keyObject);
         if (data.containsKey(keyObject)) {
             K key = (K) keyObject;
             evictionPolicy.onAccess(key, data);
