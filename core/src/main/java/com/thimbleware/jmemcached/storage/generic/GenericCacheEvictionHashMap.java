@@ -29,6 +29,13 @@ public final class GenericCacheEvictionHashMap<K, V extends SizedItem> implement
         this.capacity = maximumCapacity;
         this.lock = new ReentrantLock();
     }
+
+    public GenericCacheEvictionHashMap(int maximumCapacity, CacheEvictionPolicy<K, V> cacheEvictionPolicy) {
+        data = new ConcurrentHashMap<K, V>(maximumCapacity, 0.75f, 16);
+        this.evictionPolicy = cacheEvictionPolicy;
+        this.capacity = maximumCapacity;
+        this.lock = new ReentrantLock();
+    }
     
     @Override
     public V get(Object keyObject) {

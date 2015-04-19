@@ -19,7 +19,10 @@ import com.thimbleware.jmemcached.storage.CacheStorage;
 import com.thimbleware.jmemcached.storage.bytebuffer.BlockStorageCacheStorage;
 import com.thimbleware.jmemcached.storage.bytebuffer.BlockStoreFactory;
 import com.thimbleware.jmemcached.storage.bytebuffer.ByteBufferBlockStore;
+import com.thimbleware.jmemcached.storage.generic.ARCCacheEvictionPolicy;
+import com.thimbleware.jmemcached.storage.generic.CacheEvictionPolicy;
 import com.thimbleware.jmemcached.storage.generic.GenericCacheEvictionHashMap;
+import com.thimbleware.jmemcached.storage.generic.LRUCacheEvictionPolicy;
 import com.thimbleware.jmemcached.storage.mmap.MemoryMappedBlockStore;
 import com.thimbleware.jmemcached.util.Bytes;
 import org.apache.commons.cli.*;
@@ -52,6 +55,8 @@ public class Main {
         options.addOption("b", "binary", false, "binary protocol mode");
         options.addOption("V", false, "Show version number");
         options.addOption("v", false, "verbose (show commands)");
+        options.addOption("s", "size", true, "cache size");
+        options.addOption("e", "eviction", true, "eviction algorithm");
 
         // read command line options
         CommandLineParser parser = new PosixParser();
@@ -175,7 +180,7 @@ public class Main {
         // create daemon and start it
         final MemCacheDaemon<LocalCacheElement> daemon = new MemCacheDaemon<LocalCacheElement>();
 
-        CacheStorage<Key, LocalCacheElement> storage;
+        CacheStorage<Key, LocalCacheElement> storage = null;
         if (blockStore) {
             BlockStoreFactory blockStoreFactory = ByteBufferBlockStore.getFactory();
 
@@ -187,8 +192,22 @@ public class Main {
         }
         else  {
 //            storage = ConcurrentLinkedHashMap.create(ConcurrentLinkedHashMap.EvictionPolicy.FIFO, max_size, maxBytes);
-            System.out.println("Running my file.");
-            storage = new GenericCacheEvictionHashMap<Key, LocalCacheElement>(1000);
+            System.out.println("Running custom storage.");
+            if (cmdline.hasOption("s")) {
+                String optValue = cmdline.getOptionValue("s");
+                int cacheSize = Integer.parseInt(optValue);
+                CacheEvictionPolicy<Key, LocalCacheElement> evictionPolicy = null;
+                if (cmdline.hasOption("e")) {
+                    String evictionAlgo = cmdline.getOptionValue("e");
+                    if ("LRU".equals(evictionAlgo)) {
+                        evictionPolicy = new LRUCacheEvictionPolicy<Key, LocalCacheElement>(cacheSize);
+                    }
+                    else {
+                        evictionPolicy = new ARCCacheEvictionPolicy<Key, LocalCacheElement>(cacheSize);
+                    }
+                }
+                storage = new GenericCacheEvictionHashMap<Key, LocalCacheElement>(cacheSize, evictionPolicy);
+            }
         }
 
 
